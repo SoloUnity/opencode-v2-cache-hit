@@ -1,0 +1,26 @@
+{
+  "name": "opencode-v2-cache-hit",
+  "version": "1.0.0",
+  "description": "One cache-hit line below Context, including sub-agent usage, for OpenCode V2.",
+  "repository": "https://github.com/SoloUnity/opencode-v2-cache-hit",
+  "type": "module",
+  "exports": {
+    "./tui": "./tui.js"
+  },
+  "files": [
+    "tui.js",
+    "usage.js",
+    "placement.js",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --experimental-vm-modules --test test/*.test.js"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.5.14",
+    "solid-js": ">=1.9.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
