@@ -1,20 +1,25 @@
-export function placeLine(marker, line) {
-  if (marker.isDestroyed || line.isDestroyed) return;
-  const section = marker.parent?.getChildren().find((node) =>
-    node.getChildren()[0]?.plainText?.trim() === "Context"
-  );
-  if (!section) {
-    if (line.parent !== marker) marker.add(line);
-    return;
-  }
+function heading(node) {
+  return node.getChildren()[0]?.plainText?.trim() ?? "";
+}
 
-  // V2 has one slot for the complete sidebar, but none inside Context.
-  // Insert only our own line with the public OpenTUI renderable API.
-  const children = section.getChildren().filter((node) => node !== line);
-  const anchor = children.findLast((node) => /(?:% used| tokens)$/u.test(node.plainText?.trim() ?? "")) ?? children[0];
-  const next = children[children.indexOf(anchor) + 1];
-  const current = section.getChildren();
-  if (line.parent === section && current[current.indexOf(anchor) + 1] === line) return;
-  if (next) section.insertBefore(line, next);
-  else section.add(line);
+export function placeSection(section) {
+  const parent = section.parent;
+  if (!parent || section.isDestroyed) return;
+  const siblings = parent.getChildren();
+  const context = siblings.find((sibling) => heading(sibling) === "Context");
+  // Tokens Used Today places itself after Cache. Without Context, go before it
+  // so that the two sections do not move each other on each frame.
+  const before = siblings.find((sibling) => heading(sibling) === "Tokens Used Today")
+    ?? siblings.find((sibling) => /^(?:[▼▶]\s*)?MCP(?:\s|$)/u.test(heading(sibling)));
+
+  // V2 exposes one slot for all sidebar sections. Move only our own renderable
+  // within that slot, using OpenTUI's public API. The built-in sections stay live.
+  if (context) {
+    const next = siblings[siblings.indexOf(context) + 1];
+    if (next === section) return;
+    if (next) parent.insertBefore(section, next);
+    else parent.add(section);
+  } else if (before && siblings[siblings.indexOf(before) - 1] !== section) {
+    parent.insertBefore(section, before);
+  }
 }

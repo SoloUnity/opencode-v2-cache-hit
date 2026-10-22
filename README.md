@@ -1,18 +1,41 @@
 # opencode-v2-cache-hit
 
-Adds one line to the existing Context section in the OpenCode V2 sidebar:
+Adds a **Cache** section to the OpenCode V2 sidebar, directly below **Context**:
 
 ```text
-Context
-49,204 tokens
-5% used
-99% cache hit
+Cache      main  subs   left
+anthropic   96%   91%   3:12
+openai      92%     —    ~8m
+total       95%   91%
 ```
 
-Includes all input usage from the session and its sub-agents, including nested
-sub-agents. The percentage is `cache read / (input + cache read + cache write)`.
-The token count and `% used` stay unchanged. `— cache hit` means no usage is
-available yet. View the parent session: V2 hides the sidebar in sub-agent views.
+- `main` is the main session. `subs` is all its sub-agents, including nested
+  sub-agents. `—` means that there is no usage.
+- The percentage is `cache read / (input + cache read + cache write)`.
+- **Provider rows** show when a session in the tree sends a request with that
+  provider. A row goes away when its cache expires. Its percentages use only
+  the requests in the current TTL window.
+- **left** is the time until the cache expires. `active` means that a request
+  is in progress. Each request that reads the cache starts the TTL again.
+- **total** always shows. It includes all usage in the session.
+
+View the parent session: V2 hides the sidebar in sub-agent views.
+
+## Cache TTLs
+
+No provider reports the time left. The plugin calculates it from the start of
+the newest request for each provider and the TTL of that request's model:
+
+| Provider and model | TTL | Display |
+|---|---|---|
+| `anthropic` | 5 minutes | `3:12` |
+| `openai`, GPT-5.6 and later | At least 30 minutes | `29:05` |
+| `openai`, older models | About 10 minutes, estimate | `~8m` |
+| Other providers | About 5 minutes, estimate | `~4m` |
+
+The countdown is not a guarantee. A cache can fail before its TTL ends, for
+example after a model, effort, tool, or compaction change. Each model,
+session, and sub-agent also has its own cache.
 
 ## Install
 
@@ -33,6 +56,9 @@ Add this entry to `plugins` in that directory's `cli.json`:
 
 Keep your other plugin entries. Reopen the terminal interface if needed.
 No service restart, extra settings, or external credentials are required.
+
+If another plugin also places a section directly after Context, it must place
+its section after **Cache**. If it does not, the two sections move each other.
 
 ## Test
 

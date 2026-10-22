@@ -1,7 +1,8 @@
-import { BoxRenderable, TextRenderable } from "@opentui/core";
+import { BoxRenderable, TextAttributes, TextRenderable } from "@opentui/core";
 import { createEffect, createSignal, onCleanup } from "solid-js";
-import { placeLine } from "./placement.js";
-import { formatCacheHit, watchSession } from "./usage.js";
+import { formatTable } from "./cache.js";
+import { placeSection } from "./placement.js";
+import { watchSession } from "./usage.js";
 
 const id = "opencode-v2-cache-hit";
 
@@ -11,49 +12,41 @@ export default {
     return context.ui.slot({
       append: "sidebar.content",
       render(props) {
-        const [percent, setPercent] = createSignal();
-        const marker = new BoxRenderable(context.renderer, {
+        const [summary, setSummary] = createSignal();
+        const section = new BoxRenderable(context.renderer, {
           id: `${id}-${crypto.randomUUID()}`,
-          position: "absolute",
-          width: 0,
-          height: 0,
+          flexDirection: "column",
+          flexShrink: 0,
         });
-        let line;
-        let content = formatCacheHit();
-        let color;
+        const title = new TextRenderable(context.renderer, { attributes: TextAttributes.BOLD });
+        const rows = [];
+        section.add(title);
 
         createEffect(() => {
-          const stop = watchSession(context, props.sessionID, setPercent);
+          const stop = watchSession(context, props.sessionID, setSummary);
           onCleanup(stop);
         });
         createEffect(() => {
-          content = formatCacheHit(percent());
-          color = context.theme.text.muted;
-          if (line && !line.isDestroyed) {
-            line.content = content;
-            line.fg = color;
+          const [heading, ...lines] = formatTable(summary());
+          title.content = heading;
+          title.fg = context.theme.text.base;
+          while (rows.length > lines.length) rows.pop().destroyRecursively();
+          while (rows.length < lines.length) {
+            const row = new TextRenderable(context.renderer, {});
+            section.add(row);
+            rows.push(row);
           }
+          lines.forEach((line, index) => {
+            rows[index].content = line;
+            rows[index].fg = context.theme.text.muted;
+          });
         });
 
-        // Keep placement correct when Context mounts late or is rebuilt.
-        // The marker stays in the slot. Only the metric moves into Context.
-        marker.onLifecyclePass = () => {
-          if (!line || line.isDestroyed) {
-            line = new TextRenderable(context.renderer, {
-              id: `${id}-line-${crypto.randomUUID()}`,
-              content,
-              fg: color,
-              flexShrink: 0,
-            });
-            marker.add(line);
-          }
-          placeLine(marker, line);
-        };
-        onCleanup(() => {
-          if (line && !line.isDestroyed) line.destroyRecursively();
-          marker.destroyRecursively();
-        });
-        return marker;
+        // Run before layout so late-mounted sidebar sections and plugin
+        // reloads keep the requested order without a polling timer.
+        section.onLifecyclePass = () => placeSection(section);
+        onCleanup(() => section.destroyRecursively());
+        return section;
       },
     });
   },

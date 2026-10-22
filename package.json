@@ -1,7 +1,7 @@
 {
   "name": "opencode-v2-cache-hit",
   "version": "1.0.0",
-  "description": "One cache-hit line below Context, including sub-agent usage, for OpenCode V2.",
+  "description": "A Cache section below Context with cache hit and time left for each provider, for OpenCode V2.",
   "repository": "https://github.com/SoloUnity/opencode-v2-cache-hit",
   "type": "module",
   "exports": {
@@ -9,6 +9,7 @@
   },
   "files": [
     "tui.js",
+    "cache.js",
     "usage.js",
     "placement.js",
     "README.md"
