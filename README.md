@@ -4,7 +4,7 @@ Adds a **Cache** section to the OpenCode V2 sidebar, directly below **Context**:
 
 ```text
 Cache      main  subs   left
-anthropic   96%   91%   3:12
+anthropic   96%   91%     4m
 openai      92%     —    ~8m
 total       95%   91%
 ```
@@ -17,6 +17,8 @@ total       95%   91%
   the requests in the current TTL window.
 - **left** is the time until the cache expires. `active` means that a request
   is in progress. Each request that reads the cache starts the TTL again.
+  The time shows in minutes, rounded up. In the last minute, it shows the
+  seconds, for example `0:42`.
 - **total** always shows. It includes all usage in the session.
 
 View the parent session: V2 hides the sidebar in sub-agent views.
@@ -28,8 +30,8 @@ the newest request for each provider and the TTL of that request's model:
 
 | Provider and model | TTL | Display |
 |---|---|---|
-| `anthropic` | 5 minutes | `3:12` |
-| `openai`, GPT-5.6 and later | At least 30 minutes | `29:05` |
+| `anthropic` | 5 minutes | `4m`, `0:42` |
+| `openai`, GPT-5.6 and later | At least 30 minutes | `29m`, `0:42` |
 | `openai`, older models | About 10 minutes, estimate | `~8m` |
 | Other providers | About 5 minutes, estimate | `~4m` |
 

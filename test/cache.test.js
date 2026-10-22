@@ -97,9 +97,15 @@ test("formats aligned columns without a border", () => {
     total: { main: 95, subs: undefined },
   }), [
     "Cache      main  subs   left",
-    "anthropic   96%   91%   3:12",
+    "anthropic   96%   91%     4m",
     "firework…     —  100%    ~2m",
     "openai       5%     — active",
     "total       95%     —",
   ]);
+});
+
+test("shows whole minutes, then seconds in the last minute", () => {
+  const lefts = [30 * MINUTE, 5 * MINUTE, 4 * MINUTE + 1, 2 * MINUTE, MINUTE + 1, MINUTE, 59_001, 59_000, 9_500, 1].map((ms) =>
+    formatTable({ rows: [{ providerID: "anthropic", left: { ms, exact: true } }], total: {} })[1].split(" ").at(-1));
+  assert.deepEqual(lefts, ["30m", "5m", "5m", "2m", "2m", "1m", "1m", "0:59", "0:10", "0:01"]);
 });

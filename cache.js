@@ -77,9 +77,10 @@ function percent(value) {
 
 function left({ running, ms, exact }) {
   if (running) return "active";
-  if (!exact) return `~${Math.ceil(ms / MINUTE)}m`;
+  const minutes = Math.ceil(ms / MINUTE);
+  if (!exact) return `~${minutes}m`;
   const seconds = Math.ceil(ms / 1000);
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+  return seconds < 60 ? `0:${String(seconds).padStart(2, "0")}` : `${minutes}m`;
 }
 
 export function formatTable(summary) {
