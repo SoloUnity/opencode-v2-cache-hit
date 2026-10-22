@@ -123,7 +123,7 @@ test("shows a provider while a step runs and counts down after it ends", async (
   const stop = watch(f, () => now);
   await flush();
   f.emit("session.step.started", { sessionID: "ses_root", assistantMessageID: "msg_1", model: anthropic, started: NOW });
-  assert.deepEqual(f.updates.at(-1).rows, [{ providerID: "anthropic", main: undefined, subs: undefined, left: { running: true } }]);
+  assert.deepEqual(f.updates.at(-1).rows, [{ providerID: "anthropic", main: undefined, subs: undefined, left: { ms: 5 * MINUTE, exact: true } }]);
   now = NOW + MINUTE;
   f.emit("session.step.ended", { sessionID: "ses_root", assistantMessageID: "msg_1", tokens: tokens(10, 90) });
   assert.deepEqual(f.updates.at(-1).rows, [{ providerID: "anthropic", main: 90, subs: undefined, left: { ms: 4 * MINUTE, exact: true } }]);
@@ -167,7 +167,7 @@ test("retains events that arrive while a stale snapshot is loading", async () =>
   const stop = watch(f);
   await flush();
   assert.deepEqual(f.updates.at(-1), {
-    rows: [{ providerID: "anthropic", main: undefined, subs: undefined, left: { running: true } }],
+    rows: [{ providerID: "anthropic", main: undefined, subs: undefined, left: { ms: 5 * MINUTE, exact: true } }],
     total: { main: 90, subs: 73 },
   });
   stop();

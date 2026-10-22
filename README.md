@@ -15,8 +15,9 @@ total       95%   91%
 - **Provider rows** show when a session in the tree sends a request with that
   provider. A row goes away when its cache expires. Its percentages use only
   the requests in the current TTL window.
-- **left** is the time until the cache expires. `active` means that a request
-  is in progress. Each request that reads the cache starts the TTL again.
+- **left** is the time until the cache expires. While a request is in
+  progress, it shows the full TTL. Each request that reads the cache starts
+  the TTL again.
   The time shows in minutes, rounded up. In the last minute, it shows the
   seconds, for example `0:42`.
 - **total** always shows. It includes all usage in the session.

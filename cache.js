@@ -56,7 +56,7 @@ export function summarize({ rootID, sessions, steps, now }) {
       providerID,
       main: cacheHit(window.filter((step) => step.sessionID === rootID)),
       subs: cacheHit(window.filter((step) => step.sessionID !== rootID)),
-      left: running ? { running } : { ms, exact: ttl.exact },
+      left: { ms: running ? ttl.ms : ms, exact: ttl.exact },
     });
   }
   rows.sort((a, b) => a.providerID.localeCompare(b.providerID));
@@ -75,8 +75,7 @@ function percent(value) {
   return value === undefined ? "—" : `${value}%`;
 }
 
-function left({ running, ms, exact }) {
-  if (running) return "active";
+function left({ ms, exact }) {
   const minutes = Math.ceil(ms / MINUTE);
   if (!exact) return `~${minutes}m`;
   const seconds = Math.ceil(ms / 1000);

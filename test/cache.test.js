@@ -63,7 +63,7 @@ test("divides each provider row into the main session and sub-agents", () => {
   });
 });
 
-test("removes a row when its cache expires and keeps running rows", () => {
+test("removes a row when its cache expires and shows the full TTL while a step runs", () => {
   const now = 100 * MINUTE;
   const expired = summarize(state([step("ses_root", anthropic, now - 5 * MINUTE, tokens(10, 90))], now));
   assert.deepEqual(expired.rows, []);
@@ -71,7 +71,7 @@ test("removes a row when its cache expires and keeps running rows", () => {
     step("ses_root", anthropic, now - 6 * MINUTE, tokens(10, 90)),
     step("ses_root", anthropic, now - 2 * MINUTE, undefined, true),
   ], now));
-  assert.deepEqual(active.rows, [{ providerID: "anthropic", main: undefined, subs: undefined, left: { running: true } }]);
+  assert.deepEqual(active.rows, [{ providerID: "anthropic", main: undefined, subs: undefined, left: { ms: 5 * MINUTE, exact: true } }]);
 });
 
 test("uses the newest model of a provider and only requests in its window", () => {
@@ -92,14 +92,14 @@ test("formats aligned columns without a border", () => {
     rows: [
       { providerID: "anthropic", main: 96, subs: 91, left: { ms: 192_000, exact: true } },
       { providerID: "fireworks-ai", main: undefined, subs: 100, left: { ms: 61_000, exact: false } },
-      { providerID: "openai", main: 5, subs: undefined, left: { running: true } },
+      { providerID: "openai", main: 5, subs: undefined, left: { ms: 30 * MINUTE, exact: true } },
     ],
     total: { main: 95, subs: undefined },
   }), [
     "Cache      main  subs   left",
     "anthropic   96%   91%     4m",
     "firework…     —  100%    ~2m",
-    "openai       5%     — active",
+    "openai       5%     —    30m",
     "total       95%     —",
   ]);
 });
