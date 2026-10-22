@@ -37,7 +37,7 @@ export function watchSession(context, sessionID, update, { now = Date.now } = {}
     await Promise.all(list.filter((session) => !(session.time?.updated < cutoff)).map(async (session) => {
       let cursor;
       do {
-        const page = await context.client.session.message.list({
+        const page = await context.client.message.list({
           sessionID: session.id,
           type: "assistant",
           limit: 50,

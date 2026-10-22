@@ -46,16 +46,17 @@ function fixture() {
           await beforeList?.(input, page);
           return page;
         },
-        message: {
-          async list(input, options) {
-            calls.push({ type: "messages", input, options });
-            const data = (messages.get(input.sessionID) ?? []).toSorted((a, b) => b.time.created - a.time.created);
-            const offset = Number(input.cursor ?? 0);
-            return {
-              data: structuredClone(data.slice(offset, offset + 1)),
-              cursor: { next: data.length > offset + 1 ? String(offset + 1) : undefined },
-            };
-          },
+      },
+      // The TUI client has message.list at the top level, not under session.
+      message: {
+        async list(input, options) {
+          calls.push({ type: "messages", input, options });
+          const data = (messages.get(input.sessionID) ?? []).toSorted((a, b) => b.time.created - a.time.created);
+          const offset = Number(input.cursor ?? 0);
+          return {
+            data: structuredClone(data.slice(offset, offset + 1)),
+            cursor: { next: data.length > offset + 1 ? String(offset + 1) : undefined },
+          };
         },
       },
     },
